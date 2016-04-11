@@ -1,0 +1,550 @@
+---
+title: "Aprendizaje no supervisado"
+author: "Wilmer Prieto CI V-21468564"
+date: "10 de Abril de 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Tarea 3 Aprendizaje no supervisado
+
+A continuación se mostrará todo el procedimiento realizado para encontrar el mejor algoritmo de clustering para diversos escenarios, asi como los requisitos de esta tarea
+
+```{r, warning= FALSE}
+#La instalación de los paquetes se muestra comentada porque ya se encuentran instalados en el ambiente de desarrollo
+#install.packages("scatterplot3d")
+library("scatterplot3d")
+
+```
+
+## Se lee el archivo **a.csv** como un dataset
+
+La ultima columna es renombrada por la palabra CLASS, y se le suma 1(uno) a todos los elementos de esa columna, para manejar las clases de 1 en adelante. Y se procede a graficar la matriz de dispersion de dicho dataset
+
+```{r, warning= FALSE}
+entrada_a <- read.csv("a.csv", header = FALSE)
+colnames(entrada_a)[colnames(entrada_a) == "V3"] <- "CLASS"
+entrada_a$CLASS <- entrada_a$CLASS + 1
+plot(entrada_a$V1, entrada_a$V2, col = entrada_a$CLASS, main = "Dataset a.csv")
+```
+
+## K-medias **a.csv**
+
+Se aplica el algoritmo de k-medias, se grafica el resultado del modelo y los centroides obtenidos del mismo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_kmeans_a <- kmeans(entrada_a[ ,1:2], centers = 3)
+plot(entrada_a$V1, entrada_a$V2, col = model_kmeans_a$cluster, main = "Dataset a.csv - K medias")
+points(model_kmeans_a$centers[, c("V1","V2")], col = 1:3, pch = 19, cex = 5)
+matrizConfusionKmeans_a <- table(entrada_a$CLASS, model_kmeans_a$cluster)
+matrizConfusionKmeans_a
+aux = 0
+for (i in 1:ncol(matrizConfusionKmeans_a)){
+  aux = aux + matrizConfusionKmeans_a[i,i]
+  aux
+}
+tasa_aciertos_1 <- (aux / nrow(entrada_a))*100
+tasa_aciertos_1
+```
+
+
+## Clustering Jerarquico **a.csv**
+
+Se calcula la matriz de distancia la cual es necesaria para poder aplicar los modelos con los metodos "Single" y "Complete"
+
+```{r, warning= FALSE}
+entrada_a_cluster = entrada_a
+entrada_a_cluster$CLASS <- NULL
+entrada_a_cluster= as.matrix(entrada_a_cluster)
+distancia = dist(entrada_a_cluster)
+```
+
+## Clustering Jerarquico Single **a.csv**
+
+Se aplica el algoritmo de clustering con el metodo single, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_single_a <- hclust(distancia, method="single")
+ct_cs <- cutree(model_cluster_single_a, k=3)
+plot(entrada_a$V1, entrada_a$V2, col = ct_cs, main = "Dataset a.csv - H-Clust Single")
+matrizConfusionClusterSingle_a <- table(entrada_a$CLASS,ct_cs)
+matrizConfusionClusterSingle_a
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterSingle_a)){
+  aux = aux + matrizConfusionClusterSingle_a[i,i]
+  aux
+}
+tasa_aciertos_2 <- (aux / nrow(entrada_a))*100
+tasa_aciertos_2
+```
+
+
+## Clustering Jerarquico Complete **a.csv**
+
+Se aplica el algoritmo de clustering con el metodo complete, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_complete_a <- hclust(distancia, method="complete")
+ct_cs <- cutree(model_cluster_complete_a, k=3)
+plot(entrada_a$V1, entrada_a$V2, col = ct_cs, main = "Dataset a.csv - H-Clust Complete")
+matrizConfusionClusterComplete_a <- table(entrada_a$CLASS,ct_cs)
+matrizConfusionClusterComplete_a
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterComplete_a)){
+  aux = aux + matrizConfusionClusterComplete_a[i,i]
+  aux
+}
+tasa_aciertos_3 <- (aux / nrow(entrada_a))*100
+tasa_aciertos_3
+```
+
+El mejor algoritmo de clustering para este dataset es K-medias ya que si vemos la matriz de dispersion se pueden identificar rapidamente las tres clases existentes y las mismas estan agrupadas en forma circular, lo que lo hace ideal para aplicar K-medias y generar un buen modelo. Seguidamente se tendria el algoritmo de H-Clust con el metodo complete y por ultimo el algoritmo de H-Clust con el metodo single.
+
+## Se lee el archivo **a_big.csv** como un dataset
+
+La ultima columna es renombrada por la palabra CLASS, y se le suma 1(uno) a todos los elementos de esa columna, para manejar las clases de 1 en adelante. Y se procede a graficar la matriz de dispersion de dicho dataset
+
+```{r, warning= FALSE}
+entrada_a_big <- read.csv("a_big.csv", header = FALSE)
+colnames(entrada_a_big)[colnames(entrada_a_big) == "V3"] <- "CLASS"
+entrada_a_big$CLASS <- entrada_a_big$CLASS + 1
+plot(entrada_a_big$V1, entrada_a_big$V2, col = entrada_a_big$CLASS, main = "Dataset a_big.csv")
+
+```
+
+## K-medias **a_big.csv**
+
+Se aplica el algoritmo de k-medias, se grafica el resultado del modelo y los centroides obtenidos del mismo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_kmeans_a_big <- kmeans(entrada_a_big[ ,1:2], centers = 3)
+plot(entrada_a_big$V1, entrada_a_big$V2, col = model_kmeans_a_big$cluster, main = "Dataset a_big.csv - K medias")
+points(model_kmeans_a_big$centers[, c("V1","V2")], col = 1:3, pch = 19, cex = 5)
+matrizConfusionKmeans_a_big <- table(entrada_a_big$CLASS, model_kmeans_a_big$cluster)
+matrizConfusionKmeans_a_big
+aux = 0
+for (i in 1:ncol(matrizConfusionKmeans_a_big)){
+  aux = aux + matrizConfusionKmeans_a_big[i,i]
+  aux
+}
+tasa_aciertos_1 <- (aux / nrow(entrada_a_big))*100
+tasa_aciertos_1
+```
+
+
+Al igual que el dataset anterior la forma en la que estan agrupados los elementos de cada clase, permiten que sea ideal aplicar K-medias debido a que se agrupan en forma circular, la diferencia principal con respecto al dataset anterior es que este esta mas poblado.
+
+## Se lee el archivo **good_luck.csv** como un dataset
+
+La ultima columna es renombrada por la palabra CLASS, y se le suma 1(uno) a todos los elementos de esa columna, para manejar las clases de 1 en adelante. Y se procede a graficar la matriz de dispersion de dicho dataset
+
+```{r, warning= FALSE}
+entrada_good_luck <- read.csv("good_luck.csv", header = FALSE)
+colnames(entrada_good_luck)[colnames(entrada_good_luck) == "V11"] <- "CLASS"
+entrada_good_luck$CLASS <- entrada_good_luck$CLASS + 1
+plot(entrada_good_luck[,1:10], col = entrada_good_luck$CLASS, main = "Dataset good_luck.csv")
+```
+
+## K-medias **good_luck.csv**
+
+Se aplica el algoritmo de k-medias, se grafica el resultado del modelo y los centroides obtenidos del mismo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_kmeans_good_luck <- kmeans(entrada_good_luck[ ,1:10], centers = 2)
+plot(entrada_good_luck[,1:10], col = model_kmeans_good_luck$cluster, main = "Dataset good_luck.csv - K medias")
+matrizConfusionKmeans_good_luck <- table(entrada_good_luck$CLASS, model_kmeans_good_luck$cluster)
+matrizConfusionKmeans_good_luck
+aux = 0
+for (i in 1:ncol(matrizConfusionKmeans_good_luck)){
+  aux = aux + matrizConfusionKmeans_good_luck[i,i]
+  aux
+}
+tasa_aciertos_1 <- (aux / nrow(entrada_good_luck))*100
+tasa_aciertos_1
+```
+
+
+## Clustering Jerarquico **good_luck.csv**
+
+Se calcula la matriz de distancia la cual es necesaria para poder aplicar los modelos con los metodos "Single" y "Complete"
+
+```{r, warning= FALSE}
+entrada_good_luck_cluster = entrada_good_luck
+entrada_good_luck_cluster$CLASS <- NULL
+entrada_good_luck_cluster= as.matrix(entrada_good_luck_cluster)
+distancia = dist(entrada_good_luck_cluster)
+```
+
+## Clustering Jerarquico Single **good_luck.csv**
+
+Se aplica el algoritmo de clustering con el metodo single, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_single_good_luck <- hclust(distancia, method="single")
+ct_cs <- cutree(model_cluster_single_good_luck, k=2)
+plot(entrada_good_luck[ ,1:10], col = ct_cs, main = "Dataset good_luck.csv - H-Clust Single")
+matrizConfusionClusterSingle_good_luck <- table(entrada_good_luck$CLASS,ct_cs)
+matrizConfusionClusterSingle_good_luck
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterSingle_good_luck)){
+  aux = aux + matrizConfusionClusterSingle_good_luck[i,i]
+  aux
+}
+tasa_aciertos_2 <- (aux / nrow(entrada_good_luck))*100
+tasa_aciertos_2
+```
+
+
+## Clustering Jerarquico Complete **good_luck.csv**
+
+Se aplica el algoritmo de clustering con el metodo complete, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_complete_good_luck <- hclust(distancia, method="complete")
+ct_cs <- cutree(model_cluster_complete_good_luck, k=2)
+plot(entrada_good_luck[ ,1:10], col = ct_cs, main = "Dataset good_luck.csv - H-Clust Complete")
+matrizConfusionClusterComplete_good_luck <- table(entrada_good_luck$CLASS,ct_cs)
+matrizConfusionClusterComplete_good_luck
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterComplete_good_luck)){
+  aux = aux + matrizConfusionClusterComplete_good_luck[i,i]
+  aux
+}
+tasa_aciertos_3 <- (aux / nrow(entrada_good_luck))*100
+tasa_aciertos_3
+```
+
+Luego de haber aplicado los 3 algoritmos que se estan utilizando para la actividad, se puede concluir que ninguno de los modelos se puede destacar como bueno debido a que la tasa de aciertos para cada uno de ellos se mantiene cerca del 50%, esto que ocurre puede ser por clases mal definidos o la complejidad de la estructura del dataset
+
+## Se lee el archivo **moon.csv** como un dataset
+
+La ultima columna es renombrada por la palabra CLASS, y se le suma 1(uno) a todos los elementos de esa columna, para manejar las clases de 1 en adelante. Y se procede a graficar la matriz de dispersion de dicho dataset
+
+```{r, warning= FALSE}
+entrada_moon <- read.csv("moon.csv", header = FALSE)
+colnames(entrada_moon)[colnames(entrada_moon) == "V3"] <- "CLASS"
+entrada_moon$CLASS <- entrada_moon$CLASS + 1
+plot(entrada_moon$V1, entrada_moon$V2, col = entrada_moon$CLASS, main = "Dataset moon.csv")
+```
+
+## K-medias **moon.csv**
+
+Se aplica el algoritmo de k-medias, se grafica el resultado del modelo y los centroides obtenidos del mismo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_kmeans_moon <- kmeans(entrada_moon[ ,1:2], centers = 2)
+plot(entrada_moon$V1, entrada_moon$V2, col = model_kmeans_moon$cluster, main = "Dataset moon.csv - K medias")
+points(model_kmeans_moon$centers[, c("V1","V2")], col = 1:2, pch = 19, cex = 5)
+matrizConfusionKmeans_moon <- table(entrada_moon$CLASS, model_kmeans_moon$cluster)
+matrizConfusionKmeans_moon
+aux = 0
+for (i in 1:ncol(matrizConfusionKmeans_moon)){
+  aux = aux + matrizConfusionKmeans_moon[i,i]
+  aux
+}
+tasa_aciertos_1 <- (aux / nrow(entrada_good_luck))*100
+tasa_aciertos_1
+```
+
+
+## Clustering Jerarquico **moon.csv**
+
+Se calcula la matriz de distancia la cual es necesaria para poder aplicar los modelos con los metodos "Single" y "Complete"
+
+```{r, warning= FALSE}
+entrada_moon_cluster = entrada_moon
+entrada_moon_cluster$CLASS <- NULL
+entrada_moon_cluster= as.matrix(entrada_moon_cluster)
+distancia = dist(entrada_moon_cluster)
+```
+
+## Clustering Jerarquico Single **moon.csv**
+
+Se aplica el algoritmo de clustering con el metodo single, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_single_moon <- hclust(distancia, method="single")
+ct_cs <- cutree(model_cluster_single_moon, k=2)
+plot(entrada_moon[ ,1:2], col = ct_cs, main = "Dataset moon.csv - H-Clust Single")
+matrizConfusionClusterSingle_moon <- table(entrada_moon$CLASS,ct_cs)
+matrizConfusionClusterSingle_moon
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterSingle_moon)){
+  aux = aux + matrizConfusionClusterSingle_moon[i,i]
+  aux
+}
+tasa_aciertos_2 <- (aux / nrow(entrada_moon))*100
+tasa_aciertos_2
+```
+
+
+## Clustering Jerarquico Complete **moon.csv**
+
+Se aplica el algoritmo de clustering con el metodo complete, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_complete_moon <- hclust(distancia, method="complete")
+ct_cs <- cutree(model_cluster_complete_moon, k=2)
+plot(entrada_moon[ ,1:2], col = ct_cs, main = "Dataset moon.csv - H-Clust Complete")
+matrizConfusionClusterComplete_moon <- table(entrada_moon$CLASS,ct_cs)
+matrizConfusionClusterComplete_moon
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterComplete_moon)){
+  aux = aux + matrizConfusionClusterComplete_moon[i,i]
+  aux
+}
+tasa_aciertos_3 <- (aux / nrow(entrada_moon))*100
+tasa_aciertos_3
+```
+
+El mejor algoritmo de clustering para este dataset es el algoritmo de H-Clust con el metodo single, ya que su tasa de aciertos fue de 100%, y ademas comparando las 3 graficas correspondientes a cada uno de los modelos se puede ver evidentemente que es el unico algoritmo que pudo clasificar correctamente toda la muestra. Por otra parte H-Clust Complete y K-medias muestran un resultado parecido entre ellos pero por la estructura que presenta la matriz de dispersion ninguno de los dos se adapta correctamente al dataset.
+
+## Se lee el archivo **h.csv** como un dataset
+
+Para definir las clases de cada fila, lo que se realizo fue un redondeo hacia abajo, y se le restaron 3 unidades a cada elemento de las Clases, y con ellos se obtuvieron las clases con un rango de 1 a 11
+
+```{r, warning= FALSE}
+entrada_h <- read.csv("h.csv", header = FALSE)
+entrada_h$CLASS = floor(entrada_h$V4) - 3
+scatterplot3d(entrada_h$V1, entrada_h$V2, entrada_h$V3, color = entrada_h$CLASS, main = "Dataset h.csv")
+entrada_h$V4 <- NULL
+```
+
+## K-medias **h.csv**
+
+Se aplica el algoritmo de k-medias, se grafica el resultado del modelo y los centroides obtenidos del mismo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_kmeans_h <- kmeans(entrada_h[ ,1:3], centers = 11)
+scatterplot3d(entrada_h$V1, entrada_h$V2, entrada_h$V3, color = model_kmeans_h$cluster, main = "Dataset h.csv - k medias")
+matrizConfusionKmeans_h <- table(entrada_h$CLASS, model_kmeans_h$cluster)
+matrizConfusionKmeans_h
+aux = 0
+for (i in 1:ncol(matrizConfusionKmeans_h)){
+  aux = aux + matrizConfusionKmeans_h[i,i]
+  aux
+}
+tasa_aciertos_1 <- (aux / nrow(entrada_h))*100
+tasa_aciertos_1
+```
+
+
+## Clustering Jerarquico **h.csv**
+
+Se calcula la matriz de distancia la cual es necesaria para poder aplicar los modelos con los metodos "Single" y "Complete"
+
+```{r, warning= FALSE}
+entrada_h_cluster = entrada_h
+entrada_h_cluster$CLASS <- NULL
+entrada_h_cluster= as.matrix(entrada_h_cluster)
+distancia = dist(entrada_h_cluster)
+```
+
+## Clustering Jerarquico Single **h.csv**
+
+Se aplica el algoritmo de clustering con el metodo single, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_single_h <- hclust(distancia, method="single")
+ct_cs <- cutree(model_cluster_single_h, k=11)
+scatterplot3d(entrada_h$V1, entrada_h$V2, entrada_h$V3, color = ct_cs, main = "Dataset h.csv - H-Clust Single")
+
+matrizConfusionClusterSingle_h <- table(entrada_h$CLASS,ct_cs)
+matrizConfusionClusterSingle_h
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterSingle_h)){
+  aux = aux + matrizConfusionClusterSingle_h[i,i]
+  aux
+}
+tasa_aciertos_2 <- (aux / nrow(entrada_h))*100
+tasa_aciertos_2
+```
+
+
+## Clustering Jerarquico Complete **h.csv**
+
+Se aplica el algoritmo de clustering con el metodo complete, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_complete_h <- hclust(distancia, method="complete")
+ct_cs <- cutree(model_cluster_complete_h, k=11)
+scatterplot3d(entrada_h$V1, entrada_h$V2, entrada_h$V3, color = ct_cs, main = "Dataset h.csv - H-Clust Complete")
+
+matrizConfusionClusterComplete_h <- table(entrada_h$CLASS,ct_cs)
+matrizConfusionClusterComplete_h
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterComplete_h)){
+  aux = aux + matrizConfusionClusterComplete_h[i,i]
+  aux
+}
+tasa_aciertos_3 <- (aux / nrow(entrada_h))*100
+tasa_aciertos_3
+```
+
+En este caso no se logro obtener un buen modelo con los algoritmos aplicados, es muy posible que realizando la agrupacion de clases de una forma que no se tengan tantas clases, se pueda lograr obtener o conseguir un mejor modelo.
+
+## Se lee el archivo **s.csv** como un dataset
+
+Para definir las clases de cada fila, lo que se realizo fue un redondeo hacia abajo, y se le sumaron 6 unidades a cada elemento de las Clases, y con ellos se obtuvieron las clases con un rango de 1 a 10
+
+```{r, warning= FALSE}
+entrada_s <- read.csv("s.csv", header = FALSE)
+entrada_s$CLASS = floor(entrada_s$V4) + 6
+scatterplot3d(entrada_s$V1, entrada_s$V2, entrada_s$V3, color = entrada_s$CLASS, main = "Dataset s.csv")
+entrada_s$V4 <- NULL
+```
+
+## K-medias **s.csv**
+
+Se aplica el algoritmo de k-medias, se grafica el resultado del modelo y los centroides obtenidos del mismo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_kmeans_s <- kmeans(entrada_s[ ,1:3], centers = 10)
+scatterplot3d(entrada_s$V1, entrada_s$V2, entrada_s$V3, color = model_kmeans_s$cluster, main = "Dataset s.csv - K medias")
+matrizConfusionKmeans_s <- table(entrada_s$CLASS, model_kmeans_s$cluster)
+matrizConfusionKmeans_s
+aux = 0
+for (i in 1:ncol(matrizConfusionKmeans_s)){
+  aux = aux + matrizConfusionKmeans_s[i,i]
+  aux
+}
+tasa_aciertos_1 <- (aux / nrow(entrada_s))*100
+tasa_aciertos_1
+
+```
+
+
+## Clustering Jerarquico **s.csv**
+
+Se calcula la matriz de distancia la cual es necesaria para poder aplicar los modelos con los metodos "Single" y "Complete"
+
+```{r, warning= FALSE}
+entrada_s_cluster = entrada_s
+entrada_s_cluster$CLASS <- NULL
+entrada_s_cluster= as.matrix(entrada_s_cluster)
+distancia = dist(entrada_s_cluster)
+```
+
+## Clustering Jerarquico Single **s.csv**
+
+Se aplica el algoritmo de clustering con el metodo single, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_single_s <- hclust(distancia, method="single")
+ct_cs <- cutree(model_cluster_single_s, k=10)
+scatterplot3d(entrada_s$V1, entrada_s$V2, entrada_s$V3, color = ct_cs, main = "Dataset h.csv - H-Clust Single")
+
+matrizConfusionClusterSingle_s <- table(entrada_s$CLASS,ct_cs)
+matrizConfusionClusterSingle_s
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterSingle_s)){
+  aux = aux + matrizConfusionClusterSingle_s[i,i]
+  aux
+}
+tasa_aciertos_2 <- (aux / nrow(entrada_s))*100
+tasa_aciertos_2
+```
+
+
+## Clustering Jerarquico Complete **s.csv**
+
+Se aplica el algoritmo de clustering con el metodo complete, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_complete_s <- hclust(distancia, method="complete")
+ct_cs <- cutree(model_cluster_complete_s, k=10)
+scatterplot3d(entrada_s$V1, entrada_s$V2, entrada_s$V3, color = ct_cs, main = "Dataset s.csv - H-Clust Complete")
+
+matrizConfusionClusterComplete_s <- table(entrada_s$CLASS,ct_cs)
+matrizConfusionClusterComplete_s
+aux = 0
+for (i in 1:ncol(matrizConfusionClusterComplete_s)){
+  aux = aux + matrizConfusionClusterComplete_s[i,i]
+  aux
+}
+tasa_aciertos_3 <- (aux / nrow(entrada_s))*100
+tasa_aciertos_3
+
+```
+
+En este caso no se logro obtener un buen modelo con los algoritmos aplicados, es muy posible que realizando la agrupacion de clases de una forma que no se tengan tantas clases, se pueda lograr obtener o conseguir un mejor modelo.
+
+## Se lee el archivo **guess.csv** como un dataset
+
+Se implemento el codo de Jambu con el fin de encontrar un k para realizar las pruebas con los diversos algoritmos y detectar cual es el meJor para este caso
+
+```{r, warning= FALSE}
+entrada_guess <- read.csv("guess.csv", header = FALSE)
+plot(entrada_guess$V1, entrada_guess$V2)
+jambu = rep(0,30)
+for (k in 1:30)
+{
+  grupos = kmeans(entrada_guess, k)
+  jambu[k] = grupos$tot.withinss
+}
+plot(jambu, col = "blue", type = "b", main = "Codo de Jambu")
+```
+
+El k escogido fue igual a 5 ya que a partir de este punto la curva empieza a estabilizarse y practicamente mantiene el mismo comportamiento
+
+## K-medias **guess.csv**
+
+Se aplica el algoritmo de k-medias, se grafica el resultado del modelo y los centroides obtenidos del mismo
+
+```{r, warning= FALSE}
+model_kmeans_guess <- kmeans(entrada_guess[ ,1:2], centers = 5)
+plot(entrada_guess$V1, entrada_guess$V2, col = model_kmeans_guess$cluster, main = "Dataset guess.csv - K vecinos")
+points(model_kmeans_guess$centers[, c("V1","V2")], col = 1:5, pch = 19, cex = 5)
+
+```
+
+
+## Clustering Jerarquico **guess.csv**
+
+Se calcula la matriz de distancia la cual es necesaria para poder aplicar los modelos con los metodos "Single" y "Complete"
+
+```{r, warning= FALSE}
+entrada_guess_cluster = entrada_guess
+entrada_guess_cluster= as.matrix(entrada_guess_cluster)
+distancia = dist(entrada_guess_cluster)
+```
+
+## Clustering Jerarquico Single **guess.csv**
+
+Se aplica el algoritmo de clustering con el metodo single, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_single_guess <- hclust(distancia, method="single")
+ct_cs <- cutree(model_cluster_single_guess, k=5)
+plot(entrada_guess$V1, entrada_guess$V2, col = ct_cs, main = "Dataset guess.csv - H-Clust Single")
+```
+
+
+## Clustering Jerarquico Complete **guess.csv**
+
+Se aplica el algoritmo de clustering con el metodo complete, se grafica el resultado del modelo, se muestra la matriz de confusion y se genera la tasa de aciertos.
+
+```{r, warning= FALSE}
+model_cluster_complete_guess <- hclust(distancia, method="complete")
+ct_cs <- cutree(model_cluster_complete_guess, k=5)
+plot(entrada_guess$V1, entrada_guess$V2, col = ct_cs, main = "Dataset guess.csv - H-Clust Complete")
+
+```
+
+Se puede concluir que para este caso el K tomado dio buenos resultados, primero estaria el algoritmo K medias, seguido de H-Clust Complete. Esto debido a la estructura de la matriz de dispersion, en las cuales los grupos (clases) estan agrupados en forma circular lo que permite que k medias se adapte y pueda generar un buen modelo
+
+## Se lee el archivo **help.csv** como un dataset
+
+Para definir las clases de cada fila, lo que se realizo fue un redondeo hacia abajo, y se le sumaron 6 unidades a cada elemento de las Clases, y con ellos se obtuvieron las clases con un rango de 1 a 20
+
+```{r, warning= FALSE}
+entrada_help <- read.csv("help.csv", header = FALSE) 
+entrada_help$CLASS = floor(entrada_help$V4) + 6
+scatterplot3d(entrada_help$V1, entrada_help$V2, entrada_help$V3, color = entrada_help$CLASS, main = "Dataset help.csv")
+```
+
+
+Para definir de manera correcta las clases se pudiese estudiar los rangos que pertenecen a cada una de las letras S O S, de forma tal que se puedan separar y poder trabajar con un total de 3 clases correspondiente cada una a una letra.
